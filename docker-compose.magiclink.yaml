@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:latest
+    container_name: magiclink-redis
+    ports:
+      - "6379:6379"
+
+  magic-link-server:
+    build:
+      context: ./magic-link-server
+      dockerfile: Dockerfile
+    container_name: magic-link-server
+    ports:
+      - "5000:8000"
+    environment:
+      - MAGIC_LINK_BASE_URL=http://localhost:3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  open-webui:
+    volumes:
+      - ./custom-auth:/app/backend/internal/api/custom_auth
+    environment:
+      - WEBUI_AUTH=true
+      - JWT_EXPIRES_IN=30m
+      - WEBUI_AUTH_COOKIE_SAME_SITE=lax
+    depends_on:
+      - redis

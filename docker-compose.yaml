@@ -1,34 +1,38 @@
 services:
-  ollama:
-    volumes:
-      - ollama:/root/.ollama
-    container_name: ollama
-    pull_policy: always
-    tty: true
-    restart: unless-stopped
-    image: ollama/ollama:${OLLAMA_DOCKER_TAG-latest}
-
   open-webui:
     build:
       context: .
       args:
-        OLLAMA_BASE_URL: '/ollama'
+        OLLAMA_BASE_URL: ''
       dockerfile: Dockerfile
     image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
-    container_name: open-webui
+    container_name: open-webui-dev
     volumes:
       - open-webui:/app/backend/data
-    depends_on:
-      - ollama
     ports:
       - ${OPEN_WEBUI_PORT-3000}:8080
     environment:
-      - 'OLLAMA_BASE_URL=http://ollama:11434'
-      - 'WEBUI_SECRET_KEY='
+      - CORS_ALLOW_ORIGIN=http://localhost:3000
+      - OPENAI_API_BASE_URL=https://api.openai.com/v1
+      - OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+      - BYPASS_MODEL_ACCESS_CONTROL=true
+      - ENABLE_ADMIN_CHAT_ACCESS=false
+      - ENABLE_ADMIN_EXPORT=false
+
+      - TRUSTED_HEADER_AUTH_ENABLED=true
+      - TRUSTED_HEADER_AUTH_NAME=X-Auth-Request-User
+
+      - ENABLE_SIGNUP=true
+      - ENABLE_LOGIN_FORM=true
+      - ENABLE_OAUTH_SIGNUP=true
+      - GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
+      - GOOGLE_CLIENT_SECRET=<YOUR_GOOGLE_CLIENT_SECRET>
+      - OPENID_PROVIDER_URL=https://accounts.google.com/.well-known/openid-configuration
+      
+      - WEBUI_URL=http://localhost:3000
     extra_hosts:
       - host.docker.internal:host-gateway
-    restart: unless-stopped
+    restart: always
 
 volumes:
-  ollama: {}
   open-webui: {}

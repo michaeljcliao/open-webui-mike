@@ -76,6 +76,8 @@ from open_webui.routers import (
     tools,
     users,
     utils,
+
+    magic_link_auth,
 )
 
 from open_webui.routers.retrieval import (
@@ -897,6 +899,7 @@ app.include_router(
 )
 app.include_router(utils.router, prefix="/api/v1/utils", tags=["utils"])
 
+app.include_router(magic_link_auth.router)
 
 try:
     audit_level = AuditLevel(AUDIT_LOG_LEVEL)

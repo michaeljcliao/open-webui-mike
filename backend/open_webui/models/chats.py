@@ -39,6 +39,8 @@ class Chat(Base):
     meta = Column(JSON, server_default="{}")
     folder_id = Column(Text, nullable=True)
 
+    # old_chat = Column(Text, nullable=False, default="")  # Placeholder for backward compatibility
+
 
 class ChatModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -57,6 +59,8 @@ class ChatModel(BaseModel):
 
     meta: dict = {}
     folder_id: Optional[str] = None
+
+    # old_chat: str = ""  # Placeholder for backward compatibility
 
 
 ####################
@@ -120,6 +124,7 @@ class ChatTable:
                     "chat": form_data.chat,
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
+                    # "old_chat": "",  # Placeholder for backward compatibility
                 }
             )
 
@@ -149,6 +154,7 @@ class ChatTable:
                     "folder_id": form_data.folder_id,
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
+                    # "old_chat": "",
                 }
             )
 
