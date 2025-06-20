@@ -28,6 +28,8 @@ from open_webui.env import (
     WEBUI_AUTH_COOKIE_SAME_SITE,
     WEBUI_AUTH_COOKIE_SECURE,
     SRC_LOG_LEVELS,
+
+    WEBUI_AUTH_MAGIC_LINK_HEADER,
 )
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse, Response
@@ -322,6 +324,9 @@ async def ldap_auth(request: Request, response: Response, form_data: LdapForm):
 @router.post("/signin", response_model=SessionUserResponse)
 async def signin(request: Request, response: Response, form_data: SigninForm):
     if WEBUI_AUTH_TRUSTED_EMAIL_HEADER:
+        print("In Webui auth trusted header mode")
+        print(f"WEBUI_AUTH_TRUSTED_EMAIL_HEADER: {WEBUI_AUTH_TRUSTED_EMAIL_HEADER}")
+        print(request.headers)
         if WEBUI_AUTH_TRUSTED_EMAIL_HEADER not in request.headers:
             raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_TRUSTED_HEADER)
 
@@ -340,7 +345,26 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
                 ),
             )
         user = Auths.authenticate_user_by_trusted_header(trusted_email)
+    elif WEBUI_AUTH_MAGIC_LINK_HEADER:
+        print("In Webui auth magic link mode")
+        trusted_email = request.headers.get(WEBUI_AUTH_MAGIC_LINK_HEADER, "").lower()
+        if not trusted_email:
+            raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_MAGIC_LINK_HEADER)
+
+        if not Users.get_user_by_email(trusted_email):
+            await signup(
+                request,
+                response,
+                SignupForm(
+                    email=trusted_email,
+                    password=str(uuid.uuid4()),
+                    name=trusted_email.split("@")[0]
+                ),
+            )
+
+        user = Auths.authenticate_user_by_trusted_header(trusted_email)
     elif WEBUI_AUTH == False:
+        print("In Webui auth disabled mode")
         admin_email = "admin@localhost"
         admin_password = "admin"
 
@@ -358,9 +382,11 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
 
             user = Auths.authenticate_user(admin_email.lower(), admin_password)
     else:
+        print("normal auth mode")
         user = Auths.authenticate_user(form_data.email.lower(), form_data.password)
 
     if user:
+        print("user")
 
         expires_delta = parse_duration(request.app.state.config.JWT_EXPIRES_IN)
         expires_at = None
@@ -404,6 +430,7 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
             "permissions": user_permissions,
         }
     else:
+        print("user not found")
         raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_CRED)
 
 
@@ -518,6 +545,7 @@ async def signup(request: Request, response: Response, form_data: SignupForm):
 
 @router.get("/signout")
 async def signout(request: Request, response: Response):
+    print("signout")
     response.delete_cookie("token")
 
     if ENABLE_OAUTH_SIGNUP.value:

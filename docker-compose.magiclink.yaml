@@ -27,6 +27,8 @@ services:
     environment:
       - WEBUI_AUTH=true
       - JWT_EXPIRES_IN=30m
+      # - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=x-user-email
+      - WEBUI_AUTH_MAGIC_LINK_HEADER=X-User-Email
       - WEBUI_AUTH_COOKIE_SAME_SITE=lax
     depends_on:
       - redis
