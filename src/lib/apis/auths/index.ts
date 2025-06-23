@@ -110,6 +110,33 @@ export const getSessionUser = async (token: string) => {
 	return res;
 };
 
+export const getSessionUserNoToken = async () => {
+	let error = null;
+
+	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		credentials: 'include' // so the cookie gets sent!
+	})
+		.then(async (res) => {
+			if (!res.ok) throw await res.json();
+			return res.json();
+		})
+		.catch((err) => {
+			console.log(err);
+			error = err.detail;
+			return null;
+		});
+
+	if (error) {
+		throw error;
+	}
+
+	return res;
+};
+
 export const ldapUserSignIn = async (user: string, password: string) => {
 	let error = null;
 
@@ -285,6 +312,47 @@ export const userSignIn = async (email: string, password: string) => {
 
 	return res;
 };
+
+export const userMagicLinkSignIn = async (magic_token: string) => {
+	console.log('userMagicLinkSignIn called with token:', magic_token);
+	let error = null;
+
+	// Call the backend magic login URL
+	console.log('WEBUI_API_BASE_URL:', WEBUI_API_BASE_URL);
+	const res = await fetch(`${WEBUI_API_BASE_URL}/magic-login?magic_token=${magic_token}`, {
+		credentials: 'include' // so cookie is set
+	})
+		.then(async (res) => {
+			console.log('Response from magic login:', res);
+			console.log('Response status:', res.status);
+			console.log('Response headers:', res.headers);
+			// if (!res.ok) throw await res.json();
+			// return res.json();
+			if (!res.ok) {
+				const errBody = await res.json();
+				console.log('Response not OK, error body:', errBody);
+				throw errBody;
+			}
+			const body = await res.json();
+			console.log('Login successful, response body:', body);
+			return body;
+		})
+		.catch((err) => {
+			console.log(err);
+
+			error = err.detail;
+			return null;
+		});
+
+	if (error) {
+		console.log('Error during magic link sign-in:', error);
+		throw error;
+	}
+
+	console.log('Magic link sign-in successful, response:', res);
+
+	return res;
+}
 
 export const userSignUp = async (
 	name: string,

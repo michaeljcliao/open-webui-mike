@@ -899,7 +899,7 @@ app.include_router(
 )
 app.include_router(utils.router, prefix="/api/v1/utils", tags=["utils"])
 
-app.include_router(magic_link_auth.router)
+app.include_router(magic_link_auth.router, prefix="/api/v1/magic-login", tags=["magic_link_auth"])
 
 try:
     audit_level = AuditLevel(AUDIT_LOG_LEVEL)

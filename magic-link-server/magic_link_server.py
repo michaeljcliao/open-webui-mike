@@ -28,7 +28,7 @@ class EmailRequest(BaseModel):
 def send_magic_link(data: EmailRequest):
     token = str(uuid.uuid4())
     r.setex(token, 900, data.email)  # 15 minutes expiration
-    link = f"{MAGIC_LINK_BASE_URL}/auth/magic-login?token={token}"
+    link = f"{MAGIC_LINK_BASE_URL}/api/v1/auths/magic-login?token={token}"
 
     msg = EmailMessage()
     msg.set_content(f"Click here to log in: {link}")

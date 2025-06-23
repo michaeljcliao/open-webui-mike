@@ -51,6 +51,8 @@ from typing import Optional, List
 
 from ssl import CERT_REQUIRED, PROTOCOL_TLS
 
+import redis
+
 if ENABLE_LDAP.value:
     from ldap3 import Server, Connection, NONE, Tls
     from ldap3.utils.conv import escape_filter_chars
@@ -344,24 +346,6 @@ async def signin(request: Request, response: Response, form_data: SigninForm):
                     email=trusted_email, password=str(uuid.uuid4()), name=trusted_name
                 ),
             )
-        user = Auths.authenticate_user_by_trusted_header(trusted_email)
-    elif WEBUI_AUTH_MAGIC_LINK_HEADER:
-        print("In Webui auth magic link mode")
-        trusted_email = request.headers.get(WEBUI_AUTH_MAGIC_LINK_HEADER, "").lower()
-        if not trusted_email:
-            raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_MAGIC_LINK_HEADER)
-
-        if not Users.get_user_by_email(trusted_email):
-            await signup(
-                request,
-                response,
-                SignupForm(
-                    email=trusted_email,
-                    password=str(uuid.uuid4()),
-                    name=trusted_email.split("@")[0]
-                ),
-            )
-
         user = Auths.authenticate_user_by_trusted_header(trusted_email)
     elif WEBUI_AUTH == False:
         print("In Webui auth disabled mode")
