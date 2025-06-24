@@ -34,6 +34,7 @@ class User(Base):
     info = Column(JSONField, nullable=True)
 
     oauth_sub = Column(Text, unique=True)
+    magic_link = Column(String, nullable=True, unique=True)
 
 
 class UserSettings(BaseModel):
@@ -58,6 +59,8 @@ class UserModel(BaseModel):
     info: Optional[dict] = None
 
     oauth_sub: Optional[str] = None
+
+    magic_link: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -103,6 +106,7 @@ class UsersTable:
         profile_image_url: str = "/user.png",
         role: str = "pending",
         oauth_sub: Optional[str] = None,
+        magic_link: Optional[str] = None,
     ) -> Optional[UserModel]:
         with get_db() as db:
             user = UserModel(
@@ -116,6 +120,7 @@ class UsersTable:
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
                     "oauth_sub": oauth_sub,
+                    "magic_link": magic_link,
                 }
             )
             result = User(**user.model_dump())
@@ -155,6 +160,14 @@ class UsersTable:
         try:
             with get_db() as db:
                 user = db.query(User).filter_by(oauth_sub=sub).first()
+                return UserModel.model_validate(user)
+        except Exception:
+            return None
+        
+    def get_user_by_magic_link(self, magic_link: str) -> Optional[UserModel]:
+        try:
+            with get_db() as db:
+                user = db.query(User).filter_by(magic_link=magic_link).first()
                 return UserModel.model_validate(user)
         except Exception:
             return None
@@ -258,6 +271,19 @@ class UsersTable:
                 return UserModel.model_validate(user)
         except Exception:
             return None
+        
+    def update_user_magic_link_by_id(
+        self, id: str, magic_link: str
+    ) -> Optional[UserModel]:
+        try:
+            with get_db() as db:
+                db.query(User).filter_by(id=id).update({"magic_link": magic_link})
+                db.commit()
+
+                user = db.query(User).filter_by(id=id).first()
+                return UserModel.model_validate(user)
+        except Exception:
+            return None
 
     def update_user_by_id(self, id: str, updated: dict) -> Optional[UserModel]:
         try:
@@ -322,6 +348,14 @@ class UsersTable:
             with get_db() as db:
                 user = db.query(User).filter_by(id=id).first()
                 return user.api_key
+        except Exception:
+            return None
+        
+    def get_user_magic_link_by_id(self, id: str) -> Optional[str]:
+        try:
+            with get_db() as db:
+                user = db.query(User).filter_by(id=id).first()
+                return user.magic_link
         except Exception:
             return None
 

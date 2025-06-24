@@ -10,6 +10,8 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.sql import table, select, update, column
 from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy import inspect
+from sqlalchemy.exc import OperationalError 
 
 import json
 
@@ -98,7 +100,25 @@ def upgrade():
                 conn.execute(update_stmt)
 
     # Add columns `pinned` and `meta` to 'chat'
+    # conn = op.get_bind()
+    # inspector = Inspector.from_engine(conn)
+    # inspector = inspect(conn)
+    # existing_chat_cols = {col["name"] for col in inspector.get_columns("chat")}
+    # try:
+    #     with op.batch_alter_table("chat") as batch_op:
+    #         batch_op.add_column(sa.Column("pinned", sa.Boolean(), nullable=True))
+    # except OperationalError as e:
+    #     if "duplicate column name: pinned" in str(e):
+    #         print("'pinned' already existed – skipping")
+    #     else:
+    #         raise
+    # # if "pinned " not in existing_chat_cols:
+    # #     print('There is no "pinned" column in "chat", adding it now.')
+    # #     with op.batch_alter_table("chat") as batch_op:
+    # #         batch_op.add_column(sa.Column("pinned", sa.Boolean(), nullable=True))
     op.add_column("chat", sa.Column("pinned", sa.Boolean(), nullable=True))
+    # if "meta" not in existing_chat_cols:
+    #     print('There is no "meta" column in "chat", adding it now.')
     op.add_column(
         "chat", sa.Column("meta", sa.JSON(), nullable=False, server_default="{}")
     )

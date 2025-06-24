@@ -318,7 +318,7 @@ export const userMagicLinkSignIn = async (magic_token: string) => {
 	let error = null;
 
 	// Call the backend magic login URL
-	console.log('WEBUI_API_BASE_URL:', WEBUI_API_BASE_URL);
+	// console.log('WEBUI_API_BASE_URL:', WEBUI_API_BASE_URL);
 	const res = await fetch(`${WEBUI_API_BASE_URL}/magic-login?magic_token=${magic_token}`, {
 		credentials: 'include' // so cookie is set
 	})
@@ -422,10 +422,10 @@ export const addUser = async (
 	name: string,
 	email: string,
 	password: string,
-	role: string = 'pending'
+	role: string = 'pending',
+	magic_link: string = ''
 ) => {
 	let error = null;
-
 	const res = await fetch(`${WEBUI_API_BASE_URL}/auths/add`, {
 		method: 'POST',
 		headers: {
@@ -436,7 +436,8 @@ export const addUser = async (
 			name: name,
 			email: email,
 			password: password,
-			role: role
+			role: role,
+			magic_link: magic_link
 		})
 	})
 		.then(async (res) => {

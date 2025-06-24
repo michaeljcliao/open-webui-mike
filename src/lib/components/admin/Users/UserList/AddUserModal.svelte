@@ -7,6 +7,7 @@
 	import { WEBUI_BASE_URL } from '$lib/constants';
 
 	import Modal from '$lib/components/common/Modal.svelte';
+	import { v4 as uuidv4 } from 'uuid';
 
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
@@ -16,12 +17,14 @@
 	let loading = false;
 	let tab = '';
 	let inputFiles;
+	let shouldGenerateMagicLink = false;
 
 	let _user = {
 		name: '',
 		email: '',
 		password: '',
-		role: 'user'
+		role: 'user',
+		magic_link: ''
 	};
 
 	$: if (show) {
@@ -29,7 +32,8 @@
 			name: '',
 			email: '',
 			password: '',
-			role: 'user'
+			role: 'user',
+			magic_link: ''
 		};
 	}
 
@@ -42,12 +46,22 @@
 		if (tab === '') {
 			loading = true;
 
+			if (shouldGenerateMagicLink) {
+				const token = uuidv4();
+				// _user.magic_link = `http://localhost:5173/magic?magic_token=${token}`;
+				_user.magic_link = `${WEBUI_BASE_URL}/magic?magic_token=${token}`;
+			} else {
+				_user.magic_link = '';
+			}
+
+
 			const res = await addUser(
 				localStorage.token,
 				_user.name,
 				_user.email,
 				_user.password,
-				_user.role
+				_user.role,
+				_user.magic_link
 			).catch((error) => {
 				toast.error(`${error}`);
 			});
@@ -235,6 +249,17 @@
 										placeholder={$i18n.t('Enter Your Password')}
 										autocomplete="off"
 									/>
+								</div>
+							</div>
+
+							<div class="flex flex-col w-full mt-1">
+								<div class=" mb-1 text-xs text-gray-500">{$i18n.t('Magic Link')}</div>
+
+								<div class="flex-1">
+									<div class="flex items-center space-x-2">
+										<label class="text-xs text-gray-500">{$i18n.t('Generate Magic Link')}</label>
+										<input type="checkbox" bind:checked={shouldGenerateMagicLink} />
+									</div>
 								</div>
 							</div>
 						{:else if tab === 'import'}

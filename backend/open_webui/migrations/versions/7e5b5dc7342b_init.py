@@ -10,7 +10,11 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+import os
+import sys
 
+sys.path.append(os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '..', '..', '..')))
 import open_webui.internal.db
 from open_webui.internal.db import JSONField
 from open_webui.migrations.util import get_existing_tables

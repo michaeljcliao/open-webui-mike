@@ -28,26 +28,45 @@ def upgrade():
     chat_column = column_dict.get("chat")
     old_chat_exists = "old_chat" in column_dict
 
-    if chat_column:
-        if isinstance(chat_column["type"], sa.Text):
-            print("Converting 'chat' column to JSON")
+    if "chat" in column_dict and isinstance(chat_column["type"], sa.Text):
+        if old_chat_exists and conn.dialect.name != "sqlite":
+            # If 'old_chat' exists and we are not on SQLite, drop it
+            # SQLite does not support dropping columns directly
+            print("Dropping old 'old_chat' column")
+            op.drop_column("chat", "old_chat")
 
-            if old_chat_exists:
-                print("Dropping old 'old_chat' column")
-                op.drop_column("chat", "old_chat")
+        # Step 1: Rename current 'chat' column to 'old_chat'
+        print("Renaming 'chat' column to 'old_chat'")
+        op.alter_column(
+            "chat", "chat", new_column_name="old_chat", existing_type=sa.Text()
+        )
 
-            # Step 1: Rename current 'chat' column to 'old_chat'
-            print("Renaming 'chat' column to 'old_chat'")
-            op.alter_column(
-                "chat", "chat", new_column_name="old_chat", existing_type=sa.Text()
-            )
+        # Step 2: Add new 'chat' column of type JSON
+        print("Adding new 'chat' column of type JSON")
+        op.add_column("chat", sa.Column("chat", sa.JSON(), nullable=True))
 
-            # Step 2: Add new 'chat' column of type JSON
-            print("Adding new 'chat' column of type JSON")
-            op.add_column("chat", sa.Column("chat", sa.JSON(), nullable=True))
-        else:
-            # If the column is already JSON, no need to do anything
-            pass
+    # if chat_column:
+    #     if isinstance(chat_column["type"], sa.Text):
+    #         print("Converting 'chat' column to JSON")
+
+    #         if old_chat_exists and op.get_bind().dialect.name != "sqlite":
+    #             # If 'old_chat' exists and we are not on SQLite, drop it
+    #             # SQLite does not support dropping columns directly
+    #             print("Dropping old 'old_chat' column")
+    #             op.drop_column("chat", "old_chat")
+
+    #         # Step 1: Rename current 'chat' column to 'old_chat'
+    #         print("Renaming 'chat' column to 'old_chat'")
+    #         op.alter_column(
+    #             "chat", "chat", new_column_name="old_chat", existing_type=sa.Text()
+    #         )
+
+    #         # Step 2: Add new 'chat' column of type JSON
+    #         print("Adding new 'chat' column of type JSON")
+    #         op.add_column("chat", sa.Column("chat", sa.JSON(), nullable=True))
+    #     else:
+    #         # If the column is already JSON, no need to do anything
+    #         pass
 
     # Step 3: Migrate data from 'old_chat' to 'chat'
     chat_table = table(
@@ -75,7 +94,12 @@ def upgrade():
 
     # Step 4: Drop 'old_chat' column
     print("Dropping 'old_chat' column")
-    op.drop_column("chat", "old_chat")
+    if conn.dialect.name == "sqlite":
+        with op.batch_alter_table("chat") as batch_op:
+            batch_op.drop_column("old_chat")
+    else:
+        op.drop_column("chat", "old_chat")
+    # op.drop_column("chat", "old_chat")
 
 
 def downgrade():

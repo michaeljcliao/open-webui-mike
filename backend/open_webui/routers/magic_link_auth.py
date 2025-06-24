@@ -39,33 +39,35 @@ from open_webui.routers.auths import signup, signout, signin
 router = APIRouter()
 
 # Redis connection (shared with magic-link-server)
-r = redis.Redis(host="redis", port=6379, decode_responses=True) # For Docker
-# r = redis.Redis(host="localhost", port=6379, decode_responses=True) # for dev.sh
+# r = redis.Redis(host="redis", port=6379, decode_responses=True) # For Docker
+r = redis.Redis(host="localhost", port=6379, decode_responses=True) # for dev.sh
 
 @router.get("") # allows /auth/magic-login instead of /auth/magic-login/
 async def magic_login(request: Request, response: Response, magic_token: str):
-    print("calling magic_login")
-    print("abcd")
+    # Skip the redis setup and user self sign up
+    # email = r.get(magic_token)
+    # print(f"email from redis: {email}")
+    # if not email:
+    #     raise HTTPException(400, detail="Invalid or expired token")
 
-    email = r.get(magic_token)
-    print(f"email from redis: {email}")
-    if not email:
-        raise HTTPException(400, detail="Invalid or expired token")
-
-    # Check if the user exists, if not, create a new user with a random password
-    if not Users.get_user_by_email(email.lower()):
-        print(f"User {email} not found, creating new user")
-        await signup(
-            request,
-            response,
-            SignupForm(
-            email=email,
-            password=str(uuid.uuid4()),
-            name=email.split("@")[0]
-            )
-        )
+    # # Check if the user exists, if not, create a new user with a random password
+    # if not Users.get_user_by_email(email.lower()):
+    #     print(f"User {email} not found, creating new user")
+    #     await signup(
+    #         request,
+    #         response,
+    #         SignupForm(
+    #         email=email,
+    #         password=str(uuid.uuid4()),
+    #         name=email.split("@")[0]
+    #         )
+    #     )
     # user = Users.get_user_by_email(email.lower())
-    user = Auths.authenticate_user_by_trusted_header(email.lower())
+    # user = Auths.authenticate_user_by_trusted_header(email.lower())
+    print(f"Magic token: {magic_token}")
+    magic_link = f"{WEBUI_URL}/magic?magic_token={magic_token}"
+    print(f"Magic link: {magic_link}")
+    user = Users.get_user_by_magic_link(magic_link)
     print(f"Magic login user_id: {user.id}")
 
 

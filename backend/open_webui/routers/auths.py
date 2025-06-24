@@ -581,6 +581,7 @@ async def add_user(form_data: AddUserForm, user=Depends(get_admin_user)):
             form_data.name,
             form_data.profile_image_url,
             form_data.role,
+            magic_link=form_data.magic_link,
         )
 
         if user:

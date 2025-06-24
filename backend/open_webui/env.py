@@ -257,7 +257,6 @@ if FROM_INIT_PY:
         os.getenv("FRONTEND_BUILD_DIR", OPEN_WEBUI_DIR / "frontend")
     ).resolve()
 
-
 ####################################
 # Database
 ####################################

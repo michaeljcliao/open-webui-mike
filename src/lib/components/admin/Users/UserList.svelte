@@ -322,6 +322,30 @@
 					</div>
 				</th>
 
+				<th
+					scope="col"
+					class="px-3 py-1.5 cursor-pointer select-none"
+					on:click={() => setSortKey('magic_link')}
+				>
+					<div class="flex gap-1.5 items-center">
+						{$i18n.t('Magic Link')}
+						
+						{#if sortKey === 'magic_link'}
+							<span class="font-normal"
+								>{#if sortOrder === 'asc'}
+									<ChevronUp className="size-2" />
+								{:else}
+									<ChevronDown className="size-2" />
+								{/if}
+							</span>
+						{:else}
+							<span class="invisible">
+								<ChevronUp className="size-2" />
+							</span>
+						{/if}
+					</div>
+				</th>
+
 				<th scope="col" class="px-3 py-2 text-right" />
 			</tr>
 		</thead>
@@ -373,6 +397,8 @@
 					</td>
 
 					<td class=" px-3 py-1"> {user.oauth_sub ?? ''} </td>
+
+					<td class="px-3 py-1">  {user.magic_link ?? ''} </td>
 
 					<td class="px-3 py-1 text-right">
 						<div class="flex justify-end w-full">
