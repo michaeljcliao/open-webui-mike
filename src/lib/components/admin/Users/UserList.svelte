@@ -12,7 +12,7 @@
 
 	import { toast } from 'svelte-sonner';
 
-	import { updateUserRole, getUsers, deleteUserById } from '$lib/apis/users';
+	import { updateUserRole, getUsers, deleteUserById, sendMagicLinkEmail } from '$lib/apis/users';
 
 	import Pagination from '$lib/components/common/Pagination.svelte';
 	import ChatBubbles from '$lib/components/icons/ChatBubbles.svelte';
@@ -62,6 +62,15 @@
 		});
 		if (res) {
 			users = await getUsers(localStorage.token);
+		}
+	};
+
+	const sendMagicLinkToUser = async (user) => {
+		try {
+			await sendMagicLinkEmail(localStorage.token, user.id);
+			toast.success(`Magic link sent to ${user.email}`);
+		} catch (err) {
+			toast.error(`Failed to send magic link: ${err.message || err}`);
 		}
 	};
 
@@ -325,12 +334,12 @@
 				<th
 					scope="col"
 					class="px-3 py-1.5 cursor-pointer select-none"
-					on:click={() => setSortKey('magic_link')}
+					on:click={() => setSortKey('magic_token')}
 				>
 					<div class="flex gap-1.5 items-center">
-						{$i18n.t('Magic Link')}
+						{$i18n.t('Magic Token')}
 						
-						{#if sortKey === 'magic_link'}
+						{#if sortKey === 'magic_token'}
 							<span class="font-normal"
 								>{#if sortOrder === 'asc'}
 									<ChevronUp className="size-2" />
@@ -398,7 +407,7 @@
 
 					<td class=" px-3 py-1"> {user.oauth_sub ?? ''} </td>
 
-					<td class="px-3 py-1">  {user.magic_link ?? ''} </td>
+					<td class="px-3 py-1">  {user.magic_token ?? ''} </td>
 
 					<td class="px-3 py-1 text-right">
 						<div class="flex justify-end w-full">
@@ -415,6 +424,32 @@
 									</button>
 								</Tooltip>
 							{/if}
+
+							<Tooltip content={$i18n.t('Send Magic Link')}>
+								<button
+									class="self-center w-fit text-sm px-2 py-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl"
+									on:click={async () => {
+										await sendMagicLinkToUser(user);
+									}}
+								>
+									<!-- Envelope Icon -->
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="w-4 h-4"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M3 8l7.5 5.25L18 8M5.25 6h13.5A2.25 2.25 0 0121 8.25v7.5A2.25 2.25 0 0118.75 18H5.25A2.25 2.25 0 013 15.75v-7.5A2.25 2.25 0 015.25 6z"
+										/>
+									</svg>
+								</button>
+							</Tooltip>
+
 
 							<Tooltip content={$i18n.t('Edit User')}>
 								<button

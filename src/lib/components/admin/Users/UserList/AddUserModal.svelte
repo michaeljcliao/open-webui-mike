@@ -24,7 +24,7 @@
 		email: '',
 		password: '',
 		role: 'user',
-		magic_link: ''
+		magic_token: ''
 	};
 
 	$: if (show) {
@@ -33,7 +33,7 @@
 			email: '',
 			password: '',
 			role: 'user',
-			magic_link: ''
+			magic_token: ''
 		};
 	}
 
@@ -48,10 +48,10 @@
 
 			if (shouldGenerateMagicLink) {
 				const token = uuidv4();
-				// _user.magic_link = `http://localhost:5173/magic?magic_token=${token}`;
-				_user.magic_link = `${WEBUI_BASE_URL}/magic?magic_token=${token}`;
+				console.log('WEBUI_BASE_URL:', WEBUI_BASE_URL);
+				_user.magic_token = `${token}`;
 			} else {
-				_user.magic_link = '';
+				_user.magic_token = '';
 			}
 
 
@@ -61,7 +61,7 @@
 				_user.email,
 				_user.password,
 				_user.role,
-				_user.magic_link
+				_user.magic_token
 			).catch((error) => {
 				toast.error(`${error}`);
 			});

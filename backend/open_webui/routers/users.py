@@ -1,6 +1,8 @@
 import logging
 from typing import Optional
 
+from open_webui.config import CORS_ALLOW_ORIGIN
+
 from open_webui.models.auths import Auths
 from open_webui.models.chats import Chats
 from open_webui.models.users import (
@@ -18,6 +20,8 @@ from open_webui.env import SRC_LOG_LEVELS
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from open_webui.utils.auth import get_admin_user, get_password_hash, get_verified_user
+
+from open_webui.utils.send_email import send_email
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
@@ -325,3 +329,36 @@ async def delete_user_by_id(user_id: str, user=Depends(get_admin_user)):
         status_code=status.HTTP_403_FORBIDDEN,
         detail=ERROR_MESSAGES.ACTION_PROHIBITED,
     )
+
+
+############################
+# SendMagicLinkEmail
+############################
+
+@router.post("/{user_id}/send-magic-link")
+async def send_magic_link_email(user_id: str, user=Depends(get_admin_user)):
+    recepient_user = Users.get_user_by_id(user_id)
+    if not recepient_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ERROR_MESSAGES.USER_NOT_FOUND,
+        )
+    
+    magic_token = Users.get_user_magic_token_by_id(user_id)
+    if not magic_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ERROR_MESSAGES.MAGIC_LINK_TOKEN_NOT_FOUND,
+        )
+    
+    # Generate magic link
+    magic_link = f"{CORS_ALLOW_ORIGIN}/magic?magic_token={magic_token}"
+
+    # Send email
+    send_email(
+        to=recepient_user.email,
+        subject="Your magic login link",
+        body=f"Hi {recepient_user.name},\n\nClick the link below to login:\n{magic_link}\n\nThis link is valid for re-use."
+    )
+
+    return {"detail": "Magic link email sent"}

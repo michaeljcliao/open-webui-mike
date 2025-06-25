@@ -1074,15 +1074,19 @@ def validate_cors_origin(origin):
 # To test CORS_ALLOW_ORIGIN locally, you can set something like
 # CORS_ALLOW_ORIGIN=http://localhost:5173;http://localhost:8080
 # in your .env file depending on your frontend port, 5173 in this case.
-CORS_ALLOW_ORIGIN = os.environ.get("CORS_ALLOW_ORIGIN", "*").split(";")
+# CORS_ALLOW_ORIGIN = os.environ.get("CORS_ALLOW_ORIGIN", "*").split(";") # For multiple origins
+CORS_ALLOW_ORIGIN = os.environ.get("CORS_ALLOW_ORIGIN", "*") # For single origin; fits magic link generation
 
 if "*" in CORS_ALLOW_ORIGIN:
     log.warning(
         "\n\nWARNING: CORS_ALLOW_ORIGIN IS SET TO '*' - NOT RECOMMENDED FOR PRODUCTION DEPLOYMENTS.\n"
     )
+else:
+    log.info(f"CORS_ALLOW_ORIGIN set to: {CORS_ALLOW_ORIGIN}")
 
-validate_cors_origins(CORS_ALLOW_ORIGIN)
-
+# validate_cors_origins(CORS_ALLOW_ORIGIN) # For multiple origins
+# If you use a single origin, you can just validate it directly
+validate_cors_origin(CORS_ALLOW_ORIGIN)
 
 class BannerModel(BaseModel):
     id: str

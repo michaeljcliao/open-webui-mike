@@ -34,7 +34,7 @@ class User(Base):
     info = Column(JSONField, nullable=True)
 
     oauth_sub = Column(Text, unique=True)
-    magic_link = Column(String, nullable=True, unique=True)
+    magic_token = Column(String, nullable=True, unique=True)
 
 
 class UserSettings(BaseModel):
@@ -60,7 +60,7 @@ class UserModel(BaseModel):
 
     oauth_sub: Optional[str] = None
 
-    magic_link: Optional[str] = None
+    magic_token: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -106,7 +106,7 @@ class UsersTable:
         profile_image_url: str = "/user.png",
         role: str = "pending",
         oauth_sub: Optional[str] = None,
-        magic_link: Optional[str] = None,
+        magic_token: Optional[str] = None,
     ) -> Optional[UserModel]:
         with get_db() as db:
             user = UserModel(
@@ -120,7 +120,7 @@ class UsersTable:
                     "created_at": int(time.time()),
                     "updated_at": int(time.time()),
                     "oauth_sub": oauth_sub,
-                    "magic_link": magic_link,
+                    "magic_token": magic_token,
                 }
             )
             result = User(**user.model_dump())
@@ -164,10 +164,10 @@ class UsersTable:
         except Exception:
             return None
         
-    def get_user_by_magic_link(self, magic_link: str) -> Optional[UserModel]:
+    def get_user_by_magic_token(self, magic_token: str) -> Optional[UserModel]:
         try:
             with get_db() as db:
-                user = db.query(User).filter_by(magic_link=magic_link).first()
+                user = db.query(User).filter_by(magic_token=magic_token).first()
                 return UserModel.model_validate(user)
         except Exception:
             return None
@@ -272,12 +272,12 @@ class UsersTable:
         except Exception:
             return None
         
-    def update_user_magic_link_by_id(
-        self, id: str, magic_link: str
+    def update_user_magic_token_by_id(
+        self, id: str, magic_token: str
     ) -> Optional[UserModel]:
         try:
             with get_db() as db:
-                db.query(User).filter_by(id=id).update({"magic_link": magic_link})
+                db.query(User).filter_by(id=id).update({"magic_token": magic_token})
                 db.commit()
 
                 user = db.query(User).filter_by(id=id).first()
@@ -351,11 +351,11 @@ class UsersTable:
         except Exception:
             return None
         
-    def get_user_magic_link_by_id(self, id: str) -> Optional[str]:
+    def get_user_magic_token_by_id(self, id: str) -> Optional[str]:
         try:
             with get_db() as db:
                 user = db.query(User).filter_by(id=id).first()
-                return user.magic_link
+                return user.magic_token
         except Exception:
             return None
 
@@ -363,6 +363,5 @@ class UsersTable:
         with get_db() as db:
             users = db.query(User).filter(User.id.in_(user_ids)).all()
             return [user.id for user in users]
-
 
 Users = UsersTable()

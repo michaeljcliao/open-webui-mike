@@ -65,9 +65,9 @@ async def magic_login(request: Request, response: Response, magic_token: str):
     # user = Users.get_user_by_email(email.lower())
     # user = Auths.authenticate_user_by_trusted_header(email.lower())
     print(f"Magic token: {magic_token}")
-    magic_link = f"{WEBUI_URL}/magic?magic_token={magic_token}"
-    print(f"Magic link: {magic_link}")
-    user = Users.get_user_by_magic_link(magic_link)
+    # magic_link = f"{WEBUI_URL}/magic?magic_token={magic_token}"
+    # print(f"Magic link: {magic_link}")
+    user = Users.get_user_by_magic_token(magic_token)
     print(f"Magic login user_id: {user.id}")
 
 
@@ -116,78 +116,3 @@ async def magic_login(request: Request, response: Response, magic_token: str):
         "profile_image_url": user.profile_image_url,
         "permissions": user_permissions,
     }
-
-    # Make /auth/magic-login Serve an HTML Page (or a Clean Blank) 
-    # That Your Frontend JS Can Handle
-    # Replace the FastAPI endpoint to return a minimal HTML page or redirect
-    #  via JS that can hand off to your frontend. 
-    html_content = """
-    <!DOCTYPE html>
-    <html>
-      <head><title>Magic Login</title></head>
-      <body>
-        <script>
-          window.location.href = window.location.origin + '/?magic_token=' + encodeURIComponent('""" + magic_token + """');
-        </script>
-        <p>Logging you in...</p>
-      </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
-
-    redirect_url = WEBUI_URL
-    print(f"Redirecting to: {redirect_url}")
-    redir_res = RedirectResponse(url=redirect_url, status_code=302)
-    redir_res.delete_cookie("token")
-    redir_res.set_cookie(
-        key="token",
-        value=user_token,
-        expires=datetime_expires_at,
-        httponly=True,
-        samesite=WEBUI_AUTH_COOKIE_SAME_SITE,
-        secure=WEBUI_AUTH_COOKIE_SECURE,
-    )
-    return redir_res
-    # expires_http = datetime.datetime.fromtimestamp(
-    #     expires_at, 
-    #     tz=datetime.timezone.utc).strftime('%a, %d-%b-%Y %H:%M:%S GMT')
-    # redirect_response.headers["Set-Cookie"] = (
-    #     f"token={token}; "
-    #     f"Path=/; "
-    #     f"HttpOnly; "
-    #     f"SameSite={WEBUI_AUTH_COOKIE_SAME_SITE}; "
-    #     f"{'Secure; ' if WEBUI_AUTH_COOKIE_SECURE else ''}"
-    #     f"Expires={expires_http}"
-    # )
-
-    # r.delete(token) # Don't delete the token
-
-
-    # Sign out
-    # response = await signout(request, response)
-
-    # password unused if trusted header is set
-    # form_data = SigninForm(email=email, password="dummy")  
-
-    # # Simulate trusted header
-    # request.headers.__dict__["_list"].append((
-    #     b"x-user-email", email.encode()
-    # ))
-
-    # # Now invoke the real signin route
-    # signin_response = await signin(request, response, form_data)
-
-    # redirect_response = RedirectResponse(
-    #     headers=signin_response.headers,
-    #     url="/",
-    #     status_code=302
-    # )
-    # # redirect_response.set_cookie(
-    # #     key="token",
-    # #     value=signin_response["token"],
-    # #     httponly=True,
-    # #     samesite="Lax",  # Adjust as needed
-    # #     secure=True,  # Adjust based on your environment
-    # # )
-
-    # return redirect_response

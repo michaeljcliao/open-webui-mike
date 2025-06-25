@@ -333,6 +333,15 @@ ENABLE_REALTIME_CHAT_SAVE = (
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
 ####################################
+# SEND EMAIL
+####################################
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")  # e.g., smtp.gmail.com
+EMAIL_PORT = os.getenv("EMAIL_PORT", "587")  # e.g., 587 for TLS
+EMAIL_USERNAME = os.getenv("EMAIL_USERNAME", None)  # e.g., your Gmail address
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", None)  # the 16-char app password
+
+####################################
 # WEBUI_AUTH (Required for security)
 ####################################
 

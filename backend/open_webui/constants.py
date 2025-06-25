@@ -62,6 +62,7 @@ class ERROR_MESSAGES(str, Enum):
 
     NOT_FOUND = "We could not find what you're looking for :/"
     USER_NOT_FOUND = "We could not find what you're looking for :/"
+    MAGIC_LINK_TOKEN_NOT_FOUND = "We could not find the magic link token you're looking for :/"
     API_KEY_NOT_FOUND = "Oops! It looks like there's a hiccup. The API key is missing. Please make sure to provide a valid API key to access this feature."
     API_KEY_NOT_ALLOWED = "Use of API key is not enabled in the environment."
 

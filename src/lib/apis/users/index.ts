@@ -324,6 +324,23 @@ export const deleteUserById = async (token: string, userId: string) => {
 	return res;
 };
 
+export async function sendMagicLinkEmail(token: string, userId: string) {
+	const res = await fetch(`${WEBUI_API_BASE_URL}/users/${userId}/send-magic-link`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			authorization: `Bearer ${token}`
+		}
+	});
+
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error(data.detail || 'Failed to send magic link');
+	}
+
+	return await res.json();
+}
+
 type UserUpdateForm = {
 	profile_image_url: string;
 	email: string;
