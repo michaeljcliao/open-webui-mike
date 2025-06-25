@@ -352,13 +352,22 @@ async def send_magic_link_email(user_id: str, user=Depends(get_admin_user)):
         )
     
     # Generate magic link
+    # Fake domain is used to allow Google OAuth, but does not seems to 
+    # work outside the hosting machine
+    # FAKE_DOMAIN = None
+    # if CORS_ALLOW_ORIGIN == "http://192.168.1.151:3000":
+    #     FAKE_DOMAIN = "http://open-webui.mikehome.com:3000"
+    # elif CORS_ALLOW_ORIGIN == "http://10.200.211.253:3000":
+    #     FAKE_DOMAIN = "http://open-webui.mikekneron.com:3000"
+    # elif CORS_ALLOW_ORIGIN == "http://localhost:3000":
+    #     FAKE_DOMAIN = CORS_ALLOW_ORIGIN
     magic_link = f"{CORS_ALLOW_ORIGIN}/magic?magic_token={magic_token}"
 
     # Send email
     send_email(
         to=recepient_user.email,
-        subject="Your magic login link",
-        body=f"Hi {recepient_user.name},\n\nClick the link below to login:\n{magic_link}\n\nThis link is valid for re-use."
+        subject="Your Magic Link for Open WebUI",
+        body=f"Hi {recepient_user.name},\n\nClick the link below to login:\n{magic_link}\n\nThis link is valid for re-use.\n\nLet the administrator resend the link to you if the link does not work.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nAdmin",
     )
 
     return {"detail": "Magic link email sent"}

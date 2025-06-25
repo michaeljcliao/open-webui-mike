@@ -121,35 +121,12 @@
 		await setSessionUser(sessionUser);
 	};
 
-	const checkMagicLogin = async () => {
-		const magic_token = querystringValue('magic_token');
-		if (!magic_token) return false;
-
-		
-		const sessionUser = await userMagicLinkSignIn(magic_token).catch((error) => {
-			toast.error(`${error}`);
-			return null;
-		});
-		if (!sessionUser) {
-			toast.error($i18n.t('Magic login failed.'));
-			// goto('/');
-			return false;
-		}
-		
-		await setSessionUser(sessionUser);
-		return true;
-		
-	};
-
 	let onboarding = false;
 
 	onMount(async () => {
 		if ($user !== undefined) {
 			await goto('/');
 		}
-
-		const didMagicLogin = await checkMagicLogin();
-		if (didMagicLogin) return; // browser likely redirected
 
 		await checkOauthCallback();
 

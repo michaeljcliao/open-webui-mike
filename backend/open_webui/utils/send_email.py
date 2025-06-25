@@ -5,7 +5,6 @@ import os
 
 from open_webui.env import EMAIL_HOST, EMAIL_PORT, EMAIL_USERNAME, EMAIL_PASSWORD
 
-# Store these in your .env file
 print("Email configuration loaded from environment variables."
       f" Host: {EMAIL_HOST}, Port: {EMAIL_PORT}, Username: {EMAIL_USERNAME}")
 

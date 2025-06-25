@@ -48,7 +48,6 @@
 
 			if (shouldGenerateMagicLink) {
 				const token = uuidv4();
-				console.log('WEBUI_BASE_URL:', WEBUI_BASE_URL);
 				_user.magic_token = `${token}`;
 			} else {
 				_user.magic_token = '';

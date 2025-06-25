@@ -41,7 +41,6 @@
 			console.error('Missing magic link token');
 			await tick();
 			await new Promise(r => setTimeout(r, 1000));
-			// goto('/');
 			return;
 		}
 
@@ -54,7 +53,6 @@
 			toast.error('Magic login error');
 			await tick();
 			await new Promise(r => setTimeout(r, 1000));
-			// goto('/');
 			return;
 		}
 
@@ -63,7 +61,6 @@
 			console.error('Magic login failed.');
 			await tick();
 			await new Promise(r => setTimeout(r, 1000));
-			// goto('/');
 			return;
 		}
 
